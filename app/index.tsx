@@ -9,7 +9,7 @@ interface DeviceItem {
   name: string;
 }
 
-export default function Home() {
+export default function index() {
   const router = useRouter();
   const [devices, setDevices] = useState<DeviceItem[]>([]);
 

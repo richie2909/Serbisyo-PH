@@ -11,7 +11,7 @@ interface Message {
   sentByMe: boolean;
 }
 
-export default function Chat() {
+export default function Chatpage() {
   const { chatId } = useLocalSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
