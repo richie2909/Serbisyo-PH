@@ -1,0 +1,7 @@
+<key>NSBluetoothAlwaysUsageDescription</key>
+<string>BLE Mesh requires Bluetooth access</string>
+<key>NSBluetoothPeripheralUsageDescription</key>
+<string>BLE Mesh requires Bluetooth access</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>BLE scanning requires location</string>
+ 
