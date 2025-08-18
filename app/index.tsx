@@ -1,15 +1,24 @@
-import { View, Text, Button } from "react-native";
 import { useRouter } from "expo-router";
-import React from "react";
+import { View, Text, TouchableOpacity } from "react-native";
 
-export default function Home() {
+export default function Index() {
   const router = useRouter();
 
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text style={{ fontSize: 24, marginBottom: 20 }}>BLE Messenger</Text>
-      <Button title="Go to Chat" onPress={() => router.push("/chat/chat")} />
-      <Button title="Go to Files" onPress={() => router.push("/file/file")} />
+    <View className="flex-1 items-center justify-center bg-white dark:bg-black">
+      <Text className="text-3xl font-bold text-black dark:text-white">
+        Serbisyo
+      </Text>
+      <Text className="text-gray-600 dark:text-gray-300 mt-2">
+        Get LGU updates, scholarships, and more
+      </Text>
+
+      <TouchableOpacity
+        className="mt-6 bg-blue-600 px-6 py-3 rounded-xl"
+        onPress={() => router.push("/signup")}
+      >
+        <Text className="text-white font-semibold">Get Started</Text>
+      </TouchableOpacity>
     </View>
   );
 }

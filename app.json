@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "BLE",
-    "slug": "BLE",
+    "name": "Serbisyo PH",
+    "slug": "SerbisyoPH",
     "version": "1.0.0",
     "jsEngine": "hermes",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "ble",
+    "scheme": "Serbisyo",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
