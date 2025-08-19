@@ -30,7 +30,7 @@ export default function LoginScreen() {
       // Create session
       await account.createEmailPasswordSession(email, password);
 
-      router.replace("/(tabs)/Home"); // Redirect to home
+      router.replace("/(tabs)/home"); // Redirect to home
     } catch (err: any) {
       console.error(err);
       if (err.code === 401) {
@@ -40,7 +40,7 @@ export default function LoginScreen() {
         try {
           await account.deleteSession("current");
           await account.createEmailPasswordSession(email, password);
-          router.replace("/(tabs)/Home");
+          router.replace("/(tabs)/home");
         } catch (reErr: any) {
           setError(reErr.message || "Session conflict. Try again.");
         }
