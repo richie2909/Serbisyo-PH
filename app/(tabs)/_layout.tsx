@@ -1,5 +1,7 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { StatusBar } from "react-native";
+import Header from "@/components/Header"
 
 export default function TabLayout() {
   return (
@@ -32,8 +34,11 @@ export default function TabLayout() {
         },
         tabBarActiveTintColor: "#007AFF",
         tabBarInactiveTintColor: "gray",
+        headerRight : () => <Header />
       })}
     >
+      <StatusBar />
+
       <Tabs.Screen name="home" options={{ title: "Serbisyo" }} />
       <Tabs.Screen name="save" options={{ title: "Saved" }} />
       <Tabs.Screen name="explore" options={{ title: "Explore" }} />

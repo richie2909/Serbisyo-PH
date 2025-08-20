@@ -1,10 +1,14 @@
-import { View, Dimensions, TouchableOpacity, Text, Linking, StyleSheet } from "react-native";
+import { View, TouchableOpacity, Text, Linking, StyleSheet, Dimensions } from "react-native";
 import { WebView } from "react-native-webview";
 
-export default function FacebookEmbed({ permalink }: { permalink: string }) {
+type Props = {
+  permalink: string;
+  cardHeight?: number; // optional, can override
+};
+
+export default function FacebookEmbed({ permalink, cardHeight = 600 }: Props) {
   const screenWidth = Dimensions.get("window").width;
   const cardWidth = screenWidth - 32;
-  const cardHeight = 600; // max height for post card
 
   const html = `
     <!DOCTYPE html>
@@ -12,8 +16,8 @@ export default function FacebookEmbed({ permalink }: { permalink: string }) {
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
-          body { margin: 0; padding: 0; overflow: hidden; }
-          .container { width: 100%; transform-origin: top left; }
+          body { margin:0; padding:0; }
+          .fb-post { margin: 0 auto; }
         </style>
       </head>
       <body>
@@ -21,27 +25,22 @@ export default function FacebookEmbed({ permalink }: { permalink: string }) {
         <script async defer crossorigin="anonymous" 
           src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v16.0">
         </script>
-        <div class="container">
-          <div class="fb-post" data-href="${permalink}" data-width="${cardWidth}"></div>
-        </div>
+        <div class="fb-post" data-href="${permalink}" data-width="${cardWidth}" data-show-text="true"></div>
       </body>
     </html>
   `;
 
   return (
     <View style={[styles.card, { height: cardHeight }]}>
-      <View style={{ flex: 1, overflow: "hidden" }}>
-        <WebView
-          originWhitelist={["*"]}
-          source={{ html }}
-          javaScriptEnabled
-          domStorageEnabled
-          startInLoadingState
-          style={{ flex: 1 }}
-          scalesPageToFit={true}
-          scrollEnabled={false} // <-- lets FlatList handle scrolling
-        />
-      </View>
+      <WebView
+        originWhitelist={["*"]}
+        source={{ html }}
+        javaScriptEnabled
+        domStorageEnabled
+        startInLoadingState
+        style={{ flex: 1, backgroundColor: "transparent" }}
+        scrollEnabled={false}
+      />
 
       <TouchableOpacity
         onPress={() => Linking.openURL(permalink)}
@@ -56,35 +55,24 @@ export default function FacebookEmbed({ permalink }: { permalink: string }) {
 
 const styles = StyleSheet.create({
   card: {
+    marginVertical: 8,
     marginHorizontal: 16,
-    marginVertical: 12,
     borderRadius: 12,
     overflow: "hidden",
     backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#ddd",
     shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 3,
   },
   button: {
-    margin: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    alignItems: "center",
+    padding: 12,
     backgroundColor: "#1877F2",
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowOffset: { width: 0, height: 3 },
-    shadowRadius: 5,
-    elevation: 4,
+    alignItems: "center",
   },
   buttonText: {
     color: "#fff",
-    fontWeight: "700",
-    fontSize: 16,
-    letterSpacing: 0.5,
+    fontWeight: "bold",
   },
 });

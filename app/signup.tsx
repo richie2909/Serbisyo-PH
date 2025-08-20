@@ -1,5 +1,13 @@
 import * as React from "react";
-import { Text, TextInput, TouchableOpacity, View, ActivityIndicator } from "react-native";
+import {
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { useRouter, Link } from "expo-router";
 import { account } from "../lib/appwrite";
 
@@ -61,45 +69,58 @@ export default function SignUpScreen() {
   };
 
   return (
-    <View className="flex-1 justify-center items-center bg-white px-6">
-      <Text className="text-3xl font-bold mb-6">Create Account</Text>
-      {error ? <Text className="text-red-500 mb-2">{error}</Text> : null}
+    <KeyboardAvoidingView
+      className="flex-1 bg-white px-6"
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <View className="flex-1 justify-center items-center">
+        <Text className="text-3xl font-bold mb-6">Create Account</Text>
 
-      <TextInput
-        value={username}
-        placeholder="Username"
-        onChangeText={setUsername}
-        className="w-full border px-4 py-3 mb-4 rounded"
-      />
-      <TextInput
-        value={email}
-        placeholder="Email"
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        className="w-full border px-4 py-3 mb-4 rounded"
-      />
-      <TextInput
-        value={password}
-        placeholder="Password"
-        onChangeText={setPassword}
-        secureTextEntry
-        className="w-full border px-4 py-3 mb-6 rounded"
-      />
+        {error ? <Text className="text-red-500 mb-3">{error}</Text> : null}
 
-      <TouchableOpacity
-        onPress={onSignUpPress}
-        disabled={loading}
-        className="w-full bg-blue-600 py-3 rounded-xl items-center mb-4"
-      >
-        {loading ? <ActivityIndicator color="#fff" /> : <Text className="text-white font-semibold text-lg">Sign Up</Text>}
-      </TouchableOpacity>
+        <TextInput
+          value={username}
+          placeholder="Username"
+          onChangeText={setUsername}
+          className="w-full border border-gray-300 px-4 py-3 mb-4 rounded-lg"
+        />
 
-      <View className="flex-row items-center">
-        <Text className="mr-2">Already have an account?</Text>
-        <Link href="./login">
-          <Text className="text-blue-600 font-semibold">Sign In</Text>
-        </Link>
+        <TextInput
+          value={email}
+          placeholder="Email"
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          className="w-full border border-gray-300 px-4 py-3 mb-4 rounded-lg"
+        />
+
+        <TextInput
+          value={password}
+          placeholder="Password"
+          onChangeText={setPassword}
+          secureTextEntry
+          className="w-full border border-gray-300 px-4 py-3 mb-6 rounded-lg"
+        />
+
+        <TouchableOpacity
+          onPress={onSignUpPress}
+          disabled={loading}
+          className="w-full bg-blue-600 py-3 rounded-xl items-center mb-4"
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text className="text-white font-semibold text-lg">Sign Up</Text>
+          )}
+        </TouchableOpacity>
+
+        <View className="flex-row items-center">
+          <Text className="mr-1">Already have an account?</Text>
+          <Link href="./login">
+            <Text className="text-blue-600 font-semibold">Sign In</Text>
+          </Link>
+        </View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }

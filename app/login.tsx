@@ -20,23 +20,19 @@ export default function LoginScreen() {
     setLoading(true);
 
     try {
-      // Delete any active session first
+      // clear existing session if any
       try {
         await account.deleteSession("current");
-      } catch {
-        // no session, ignore
-      }
+      } catch {}
 
-      // Create session
       await account.createEmailPasswordSession(email, password);
-
-      router.replace("/(tabs)/home"); // Redirect to home
+      router.replace("/(tabs)/home");
     } catch (err: any) {
       console.error(err);
       if (err.code === 401) {
-        setError("Invalid credentials. Check your email and password.");
+        setError("Invalid email or password.");
       } else if (err.code === 409) {
-        setError("A session is already active. Logging out previous session...");
+        setError("Another session is active. Logging you out...");
         try {
           await account.deleteSession("current");
           await account.createEmailPasswordSession(email, password);
@@ -45,7 +41,7 @@ export default function LoginScreen() {
           setError(reErr.message || "Session conflict. Try again.");
         }
       } else {
-        setError(err.message || "Sign-in failed. Try again.");
+        setError(err.message || "Sign-in failed. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -53,39 +49,56 @@ export default function LoginScreen() {
   };
 
   return (
-    <View className="flex-1 justify-center items-center bg-white px-6">
-      <Text className="text-3xl font-bold mb-6">Sign In</Text>
-      {error ? <Text className="text-red-500 mb-2">{error}</Text> : null}
+    <View className="flex-1 justify-center items-center bg-gray-50 px-6">
+      <Text className="text-3xl font-bold mb-6 text-gray-900">Sign In</Text>
+
+      {error ? (
+        <View className="bg-red-100 border border-red-400 rounded-lg p-3 mb-4 w-full">
+          <Text className="text-red-600 text-sm">{error}</Text>
+        </View>
+      ) : null}
 
       <TextInput
         value={email}
         placeholder="Email"
+        placeholderTextColor="#9CA3AF"
         onChangeText={setEmail}
         keyboardType="email-address"
-        className="w-full border px-4 py-3 mb-4 rounded"
+        className="w-full border border-gray-300 bg-white px-4 py-3 mb-4 rounded-xl"
       />
       <TextInput
         value={password}
         placeholder="Password"
+        placeholderTextColor="#9CA3AF"
         onChangeText={setPassword}
         secureTextEntry
-        className="w-full border px-4 py-3 mb-6 rounded"
+        className="w-full border border-gray-300 bg-white px-4 py-3 mb-6 rounded-xl"
       />
 
       <TouchableOpacity
         onPress={onSignInPress}
         disabled={loading}
-        className="w-full bg-blue-600 py-3 rounded-xl items-center mb-4"
+        className={`w-full py-3 roundeggd-xl items-center mb-4 ${
+          loading ? "bg-gray-400" : "bg-indigo-600"
+        }`}
       >
-        {loading ? <ActivityIndicator color="#fff" /> : <Text className="text-white font-semibold text-lg">Sign In</Text>}
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text className="text-white font-semibold text-lg">Sign In</Text>
+        )}
       </TouchableOpacity>
 
       <View className="flex-row items-center">
-        <Text className="mr-2">Don’t have an account?</Text>
-        <Link href="./signup">
-          <Text className="text-blue-600 font-semibold">Sign Up</Text>
+        <Text className="text-gray-700 mr-2">Don’t have an account?</Text>
+        <Link href="./signup" asChild>
+          <TouchableOpacity>
+            <Text className="text-indigo-600 font-semibold">Sign Up</Text>
+          </TouchableOpacity>
         </Link>
       </View>
     </View>
   );
 }
+
+
