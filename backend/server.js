@@ -1,7 +1,9 @@
 import express from "express";
+
 import fetch from "node-fetch";
 import dotenv from "dotenv";
 import cors from "cors";
+
 
 dotenv.config();
 
@@ -53,7 +55,7 @@ app.get("/api/posts", async (req, res) => {
 
     // 3️⃣ Map posts and collect all images
     const posts = (postsData.data || []).map(post => {
-      const images: string[] = [];
+      const images = [];
 
       // Attachments
       if (post.attachments?.data) {
