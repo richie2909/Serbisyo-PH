@@ -1,10 +1,13 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "@/components/Header"
 
 export default function TabLayout() {
   return (
+    <> 
+      <StatusBar />
     <Tabs
       screenOptions={({ route }) => ({
         headerTitleAlign: "center",
@@ -37,12 +40,11 @@ export default function TabLayout() {
         headerRight : () => <Header />
       })}
     >
-      <StatusBar />
 
       <Tabs.Screen name="home" options={{ title: "Serbisyo" }} />
       <Tabs.Screen name="save" options={{ title: "Saved" }} />
       <Tabs.Screen name="explore" options={{ title: "Explore" }} />
       <Tabs.Screen name="profile" options={{ title: "Profile" }} />
-    </Tabs>
+    </Tabs></>
   );
 }

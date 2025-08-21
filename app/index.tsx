@@ -28,7 +28,7 @@ export default function Index() {
         {/* Secondary Action (Optional) */}
         <TouchableOpacity
           className="mt-4 border border-white px-6 py-4 rounded-2xl active:opacity-80"
-          onPress={() => router.push("/login")}
+          onPress={() => router.replace("/login")}
         >
           <Text className="text-center text-white font-semibold text-lg">
             Log In

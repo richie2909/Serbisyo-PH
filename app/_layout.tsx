@@ -39,7 +39,7 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ThemeProvider>
         <StatusBar />
-        <Stack />
+        <Stack screenOptions={{headerShown: false}}/>
         {/* Optional: You can handle redirects inside each route if needed */}
       </ThemeProvider>
     </SafeAreaProvider>

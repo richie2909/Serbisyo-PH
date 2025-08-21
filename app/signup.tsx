@@ -70,7 +70,7 @@ export default function SignUpScreen() {
 
   return (
     <KeyboardAvoidingView
-      className="flex-1 bg-white px-6"
+      className="flex-1 bg-white px-10"
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <View className="flex-1 justify-center items-center">
@@ -116,7 +116,7 @@ export default function SignUpScreen() {
 
         <View className="flex-row items-center">
           <Text className="mr-1">Already have an account?</Text>
-          <Link href="./login">
+          <Link href="./login" replace>
             <Text className="text-blue-600 font-semibold">Sign In</Text>
           </Link>
         </View>

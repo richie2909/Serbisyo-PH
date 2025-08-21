@@ -49,7 +49,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <View className="flex-1 justify-center items-center bg-gray-50 px-6">
+    <View className="flex-1 justify-center items-center bg-gray-50 px-10">
       <Text className="text-3xl font-bold mb-6 text-gray-900">Sign In</Text>
 
       {error ? (
@@ -78,8 +78,8 @@ export default function LoginScreen() {
       <TouchableOpacity
         onPress={onSignInPress}
         disabled={loading}
-        className={`w-full py-3 roundeggd-xl items-center mb-4 ${
-          loading ? "bg-gray-400" : "bg-indigo-600"
+        className={`w-full py-3 rounded-2xl items-center mb-4 ${
+          loading ? "bg-gray-400" : "bg-blue-600"
         }`}
       >
         {loading ? (
@@ -91,9 +91,9 @@ export default function LoginScreen() {
 
       <View className="flex-row items-center">
         <Text className="text-gray-700 mr-2">Don’t have an account?</Text>
-        <Link href="./signup" asChild>
+        <Link href="./signup" replace>
           <TouchableOpacity>
-            <Text className="text-indigo-600 font-semibold">Sign Up</Text>
+            <Text className="text-blue-600 font-semibold">Sign Up</Text>
           </TouchableOpacity>
         </Link>
       </View>

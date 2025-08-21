@@ -1,141 +1,161 @@
-// app/post/[id].tsx
-import { View, Dimensions, TouchableOpacity, Text, Linking, StyleSheet, ScrollView } from "react-native";
-import { WebView } from "react-native-webview";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  Linking,
+  Animated,
+} from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import antipoloData from "../../constants/antipolo.json";
+import { usePostStore, Post } from "../../store/PostStore";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function PostDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const [post, setPost] = useState<Post | null>(null);
+  const [loading, setLoading] = useState(true);
+  const decodedPermalink = id ? decodeURIComponent(id) : "";
 
-  if (!id)
+  const getPostByPermalink = usePostStore((state) => state.getPostByPermalink);
+
+  useEffect(() => {
+    const fetchPost = async () => {
+      const localPost = getPostByPermalink(decodedPermalink);
+      if (localPost) {
+        setPost(localPost);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const res = await fetch("https://serbisyo-ph.vercel.app/api/posts");
+        const data = await res.json();
+
+        const foundPost: Post | undefined = data.posts
+          .map((p: Post) => ({
+            ...p,
+            page_name: data.page?.name,
+            page_logo: data.page?.logo,
+          }))
+          .find((p: Post) => p.permalink === decodedPermalink);
+
+        setPost(foundPost || null);
+      } catch (err) {
+        console.error("Error fetching post:", err);
+        setPost(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPost();
+  }, [decodedPermalink, getPostByPermalink]);
+
+  if (loading)
     return (
-      <View style={styles.centered}>
-        <Text>Invalid post ID</Text>
+      <View className="flex-1 justify-center items-center bg-gray-100">
+        <ActivityIndicator size="large" color="#1877F2" />
       </View>
     );
 
-  const post = antipoloData.find((p) => p.id === id);
-  if (!post)
+  if (!post) {
+    router.replace("/+not-found");
     return (
-      <View style={styles.centered}>
-        <Text>Post not found</Text>
+      <View className="flex-1 justify-center items-center bg-gray-100">
+        <Text className="text-gray-500 mb-2">Redirecting...</Text>
+        <ActivityIndicator size="large" color="#1877F2" />
       </View>
     );
+  }
 
-  const permalink = post.permalink_url ?? "";
-  const screenWidth = Dimensions.get("window").width;
-  const cardWidth = screenWidth - 32;
+  const pageName = post.page_name || "Unknown Page";
+  const pageLogo = post.page_logo;
 
-  const html = `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>body { margin:0; padding:0; }</style>
-      </head>
-      <body>
-        <div id="fb-root"></div>
-        <script async defer crossorigin="anonymous" 
-          src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v16.0">
-        </script>
-        <div class="fb-post" data-href="${permalink}" data-width="${cardWidth}"></div>
-      </body>
-    </html>
-  `;
+  const FadeInImage = ({ uri }: { uri: string }) => {
+    const opacity = new Animated.Value(0);
+
+    const onLoad = () => {
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }).start();
+    };
+
+    return (
+      <Animated.Image
+        source={{ uri }}
+        onLoad={onLoad}
+        className="w-full h-80 my-2 rounded-lg bg-gray-200"
+        style={{ opacity }}
+      />
+    );
+  };
 
   return (
-    <View style={styles.container}>
-      {/* Back button */}
-      <TouchableOpacity onPress={() => router.back()} style={styles.backButton} activeOpacity={0.7}>
-        <Text style={styles.backText}>← Back</Text>
-      </TouchableOpacity>
+    <ScrollView className="flex-1 bg-gray-100">
+      {/* Back Button */}
+    <TouchableOpacity
+  onPress={() => router.back()}
+  className="m-4 p-2 bg-white rounded-full shadow flex-row items-center w-24 justify-center"
+  activeOpacity={0.7}
+>
+  <Ionicons name="arrow-back" size={20} color="#007AFF" />
+  <Text className="text-blue-600 font-semibold text-lg ml-2">Back</Text>
+</TouchableOpacity> 
 
-      {/* WebView container */}
-      <View style={styles.webviewWrapper}>
-        <WebView
-          originWhitelist={["*"]}
-          source={{ html }}
-          javaScriptEnabled
-          domStorageEnabled
-          startInLoadingState
-          style={styles.webview}
-          nestedScrollEnabled
-        />
+      <View className="bg-white mx-4 rounded-2xl py-5 px-3 mb-6">
+        {/* Header */}
+        <View className="flex-row items-center mb-3">
+          {pageLogo ? (
+            <Image source={{ uri: pageLogo }} className="w-10 h-10 rounded-full mr-3" />
+          ) : (
+            <View className="w-10 h-10 bg-gray-300 rounded-full mr-3" />
+          )}
+          <View className="flex-1">
+            <Text className="font-bold text-base">{pageName}</Text>
+            {post.timestamp && (
+              <Text className="text-gray-500 text-xs">
+                {new Date(post.timestamp).toLocaleString()}
+              </Text>
+            )}
+          </View>
+        </View>
+
+        {/* Caption */}
+        {post.caption && (
+          <Text className="px-1 py-2 text-gray-800 text-base">
+            {post.caption.split(" ").map((word, idx) =>
+              word.startsWith("#") ? (
+                <Text key={idx} className="text-blue-500">
+                  {word}{" "}
+                </Text>
+              ) : (
+                word + " "
+              )
+            )}
+          </Text>
+        )}
+
+        {/* Images stacked vertically */}
+        {post.images?.map((uri, idx) => (
+          <FadeInImage key={idx} uri={uri} />
+        ))}
+
+        {/* View on Facebook */}
+        {post.permalink && (
+          <TouchableOpacity
+            onPress={() => Linking.openURL(post.permalink)}
+            className="mt-4 py-3 bg-blue-500 rounded-2xl items-center"
+          >
+            <Text className="text-white font-bold text-base">View on Facebook</Text>
+          </TouchableOpacity>
+        )}
       </View>
-
-      {/* Visit post button */}
-      {permalink ? (
-        <TouchableOpacity
-          onPress={() => Linking.openURL(permalink)}
-          style={styles.button}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.buttonText}>Visit Post on Facebook</Text>
-        </TouchableOpacity>
-      ) : null}
-    </View>
+    </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    paddingBottom: 16,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  backButton: {
-    margin: 16,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    alignSelf: "flex-start",
-    backgroundColor: "#f0f0f0",
-    borderRadius: 8,
-  },
-  backText: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#007AFF",
-  },
-  webviewWrapper: {
-    flex: 1, // take all remaining space
-    marginHorizontal: 16,
-    borderRadius: 12,
-    overflow: "hidden",
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#ddd",
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-  },
-  webview: {
-    flex: 1,
-  },
-  button: {
-    marginHorizontal: 16,
-    marginTop: 16,
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    alignItems: "center",
-    backgroundColor: "#1877F2",
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowOffset: { width: 0, height: 3 },
-    shadowRadius: 5,
-    elevation: 4,
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "700",
-    fontSize: 16,
-    letterSpacing: 0.5,
-  },
-});

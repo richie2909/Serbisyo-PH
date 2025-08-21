@@ -3,6 +3,8 @@ import express from "express";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
 import cors from "cors";
+import searchPosts from "./searchPosts.js"; // adjust path
+
 
 
 dotenv.config();
@@ -15,6 +17,7 @@ const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 app.use(cors());
 app.use(express.json());
 
+app.use(searchPosts);
 // ------------------------
 // Test Page Access Token
 // ------------------------
