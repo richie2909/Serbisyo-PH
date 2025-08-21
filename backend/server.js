@@ -31,7 +31,7 @@ app.get("/api/test-token", async (req, res) => {
 });
 
 // ------------------------
-// Fetch paginated posts + page info
+// Fetch paginated posts + page info + all images
 // ------------------------
 app.get("/api/posts", async (req, res) => {
   try {
@@ -44,19 +44,38 @@ app.get("/api/posts", async (req, res) => {
     const pageData = await pageResp.json();
     if (pageData.error) throw new Error(pageData.error.message);
 
-    // 2️⃣ Fetch posts
-    let postsUrl = `https://graph.facebook.com/v18.0/${PAGE_ID}/feed?fields=message,full_picture,permalink_url,created_time&limit=${limit}&access_token=${PAGE_ACCESS_TOKEN}`;
+    // 2️⃣ Fetch posts with attachments (to get multiple images)
+    let postsUrl = `https://graph.facebook.com/v18.0/${PAGE_ID}/feed?fields=message,permalink_url,created_time,attachments{media,subattachments}&limit=${limit}&access_token=${PAGE_ACCESS_TOKEN}`;
     if (after) postsUrl += `&after=${after}`;
     const postsResp = await fetch(postsUrl);
     const postsData = await postsResp.json();
     if (postsData.error) throw new Error(postsData.error.message);
 
-    const posts = (postsData.data || []).map(post => ({
-      caption: post.message || "",
-      imageUrl: post.full_picture || "",
-      permalink: post.permalink_url,
-      timestamp: post.created_time
-    }));
+    // 3️⃣ Map posts and collect all images
+    const posts = (postsData.data || []).map(post => {
+      const images: string[] = [];
+
+      // Attachments
+      if (post.attachments?.data) {
+        post.attachments.data.forEach(att => {
+          // Subattachments (for multi-photo posts)
+          if (att.subattachments?.data) {
+            att.subattachments.data.forEach(sub => {
+              if (sub.media?.image?.src) images.push(sub.media.image.src);
+            });
+          } else if (att.media?.image?.src) {
+            images.push(att.media.image.src);
+          }
+        });
+      }
+
+      return {
+        caption: post.message || "",
+        images, // array of all image URLs
+        permalink: post.permalink_url,
+        timestamp: post.created_time
+      };
+    });
 
     res.json({
       page: {
