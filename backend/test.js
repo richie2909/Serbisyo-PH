@@ -22,24 +22,14 @@ app.get("/webhook", (req, res) => {
   const token = req.query["hub.verify_token"];
   const challenge = req.query["hub.challenge"];
 
-    console.log(PAGE_ACCESS_TOKEN)
-    console.log(PAGE_ID)
-    console.log(VERIFY_TOKEN)
-  // Log what Facebook sent
-
-  console.log("Webhook GET called with query:", req.query);
-  console.log("Expected VERIFY_TOKEN:", VERIFY_TOKEN);
-
   if (mode && token) {
     if (mode === "subscribe" && token === VERIFY_TOKEN) {
       console.log("Webhook verified!");
       return res.status(200).send(challenge);
     } else {
-      console.log("Webhook verification failed: token mismatch.");
       return res.sendStatus(403);
     }
   } else {
-    console.log("Webhook verification failed: missing mode or token.");
     return res.sendStatus(400);
   }
 });
@@ -49,50 +39,48 @@ app.get("/webhook", (req, res) => {
 // ------------------------
 app.get("/api/test-token", async (req, res) => {
   try {
-    const url = `https://graph.facebook.com/v18.0/${PAGE_ID}?fields=id,name&access_token=${PAGE_ACCESS_TOKEN}`;
+    const url = `https://graph.facebook.com/v23.0/${PAGE_ID}?fields=id,name&access_token=${PAGE_ACCESS_TOKEN}`;
     const response = await fetch(url);
     const data = await response.json();
 
-    if (data.error) {
-      throw new Error(data.error.message);
-    }
+    if (data.error) throw new Error(data.error.message);
 
-    res.json({
-      success: true,
-      page: data,
-      message: "Page Access Token is working!"
-    });
+    res.json({ success: true, page: data });
   } catch (err) {
-    res.json({
-      success: false,
-      error: err.message
-    });
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
 // ------------------------
-// Fetch Latest Page Posts
+// Fetch ALL Page Feed Posts
 // ------------------------
 app.get("/api/posts", async (req, res) => {
   try {
-    const url = `https://graph.facebook.com/v18.0/${PAGE_ID}/posts?fields=message,full_picture,permalink_url,created_time&limit=50&access_token=${PAGE_ACCESS_TOKEN}`;
-    const response = await fetch(url);
-    const data = await response.json();
+    let url = `https://graph.facebook.com/v23.0/${PAGE_ID}/feed?fields=message,full_picture,permalink_url,created_time,privacy&limit=50&access_token=${PAGE_ACCESS_TOKEN}`;
+    let allPosts = [];
 
-    if (data.error) {
-      throw new Error(data.error.message);
+    while (url) {
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data.error) throw new Error(data.error.message);
+
+      const posts = (data.data || []).map(post => ({
+        caption: post.message || "",
+        imageUrl: post.full_picture || "",
+        permalink: post.permalink_url,
+        timestamp: post.created_time,
+        privacy: post.privacy?.description || "Unknown"
+      }));
+
+      allPosts = allPosts.concat(posts);
+
+      url = data.paging?.next || null;
     }
 
-    const posts = data.data.map(post => ({
-      caption: post.message || "",
-      imageUrl: post.full_picture || "",
-      permalink: post.permalink_url,
-      timestamp: post.created_time
-    }));
-
-    res.json(posts);
+    res.json(allPosts);
   } catch (err) {
-    console.error("Error fetching page posts:", err.message);
+    console.error("Error fetching page feed posts:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
