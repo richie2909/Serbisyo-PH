@@ -1,13 +1,13 @@
-import Express from "express"
+import express from "express"
 import fetch from "node-fetch";
 import dotenv from "dotenv"
 dotenv.config()
 
-export const FetchData = Express.Router()
+export const FetchData = express.Router()
 
 const PAGE_ID = process.env.PAGE_ID;
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
-Router.get("/api/posts", async (req, res) => {
+FetchData.get("/api/posts", async (req, res) => {
   try {
     const limit = req.query.limit || 10; // default 10 posts per request
     const after = req.query.after || ""; // cursor for pagination
