@@ -5,7 +5,7 @@ import Router from "./testToken.js";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
 import cors from "cors";
-import searchPosts from "./searchPosts.js"; // adjust path
+import searchPosts from "./searchPost.js"; // adjust path
 
 
 
