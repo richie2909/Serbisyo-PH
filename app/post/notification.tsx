@@ -1,4 +1,5 @@
 // app/notifications.tsx
+import { useRouter } from "expo-router";
 import { View, Text, FlatList, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -39,6 +40,7 @@ const notifications: Notification[] = [
 ];
 
 export default function NotificationsPage() {
+  const router = useRouter()
   const renderItem = ({ item }: { item: Notification }) => {
     const icon =
       item.type === "alert"
@@ -74,16 +76,28 @@ export default function NotificationsPage() {
 
   return (
     <View className="flex-1 bg-gray-50">
+      
+      
+
       <FlatList
         data={notifications}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         ListHeaderComponent={
-          <View className="p-4 bg-white border-b border-gray-200">
-            <Text className="text-lg font-bold text-[#007AFF]">
+          <View className=" bg-white border-b border-gray-200 flex  flex-row align-middle">  
+                     <TouchableOpacity
+  onPress={() => router.back()}
+  className="m-4 p-2 bg-white rounded-full flex-row items-center w-24 justify-center"
+  activeOpacity={0.7}
+>
+  <Ionicons name="arrow-back" size={20} color="#007AFF" />
+  <Text className="text-blue-600 font-semibold text-lg ml-2">Back</Text>
+</TouchableOpacity> 
+            <Text className="text-lg font-bold text-[#007AFF] text-center ml-7 mt-6">
               Notifications
             </Text>
-          </View>
+              
+            </View>
         }
       />
     </View>

@@ -12,7 +12,7 @@ export default function Header() {
       <View className="flex-row items-center space-x-4 gap-x-3" >
         {/* Bell Icon */}
         <TouchableHighlight
-          onPress={() => router.replace("/notification")}
+          onPress={() => router.push("/post/notification")}
           underlayColor="transparent"
           activeOpacity={0.7}
           className="rounded-full p-2"

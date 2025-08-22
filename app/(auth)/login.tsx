@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Text, TextInput, TouchableOpacity, View, ActivityIndicator } from "react-native";
 import { useRouter, Link } from "expo-router";
-import { account } from "../lib/appwrite";
+import { account } from "../../lib/appwrite";
 
 export default function LoginScreen() {
   const router = useRouter();

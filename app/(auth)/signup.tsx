@@ -9,7 +9,7 @@ import {
   Platform,
 } from "react-native";
 import { useRouter, Link } from "expo-router";
-import { account } from "../lib/appwrite";
+import { account } from "../../lib/appwrite";
 
 export default function SignUpScreen() {
   const router = useRouter();
