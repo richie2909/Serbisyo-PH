@@ -6,7 +6,7 @@
     "jsEngine": "hermes",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "Serbisyo",
+    "scheme": "serbisyo",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -40,6 +40,19 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "f0623b87-f277-47f3-895f-7f078af2632e"
+      },
+      "supabaseUrl": "https://fgtzbjkotxntmdpvfruo.supabase.co",
+      "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZndHpiamtvdHhudG1kcHZmcnVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU2Nzk1MjMsImV4cCI6MjA3MTI1NTUyM30.47HAVpECsiGFiHopqp7-9aYytUib-Cl9X7KjURS-deI",
+      "supabaseServiceRoleKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZndHpiamtvdHhudG1kcHZmcnVvIiwicm9sZSIsImlhdCI6MTc1NTY3OTUyMywiZXhwIjoyMDcxMjU1NTIzfQ.cNRRd9vBsNnuiQumw-P5smOTJjI5RW9P3UpTQx9TOQo",
+      "authAppId": "1495856457713605",
+      "authGoogleClientId": "1060647764864-nk0v89g9381k9ncgdrg623lo4kqdnso7.apps.googleusercontent.com",
+      "authCallbackUrl": "https://fgtzbjkotxntmdpvfruo.supabase.co/auth/v1/callback",
+      "authGoogleCallbackUrl": "https://fgtzbjkotxntmdpvfruo.supabase.co/auth/v1/callback"
     }
   }
 }

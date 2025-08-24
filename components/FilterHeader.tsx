@@ -14,13 +14,13 @@ interface SortChange {
 interface Props {
   onFilterChange?: (category: string) => void;
   onSortChange?: (sort: SortChange) => void;
+  categories?: string[]; // 🔹 dynamic categories from SearchPage
 }
-
-const categories: string[] = ["All", "City Government", "Scholar","Ayuda", "Others"];
 
 export default function FilterHeaderComponent({
   onFilterChange,
   onSortChange,
+  categories = ["All"],
 }: Props) {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [sortMode, setSortMode] = useState<SortMode>("time");
@@ -45,7 +45,7 @@ export default function FilterHeaderComponent({
   }
 
   return (
-    <View className="w-full bg-gray-50  px-3 mt-4 py-2">
+    <View className="w-full bg-gray-1000 px-3 mt-4 py-2">
       {/* Categories */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         {categories.map((cat) => (
@@ -69,7 +69,6 @@ export default function FilterHeaderComponent({
 
       {/* Sort Options */}
       <View className="flex-row items-center justify-between mt-4 px-1">
-        {/* Switch Sort Mode */}
         <View className="flex-row space-x-3 mr-2">
           <TouchableOpacity
             onPress={() => {
@@ -126,7 +125,7 @@ export default function FilterHeaderComponent({
             size={18}
             color="#007AFF"
           />
-          <Text className="ml-1 text-blue-500 text-sm " >
+          <Text className="ml-1 text-blue-500 text-sm">
             {sortMode === "time"
               ? timeOrder === "newest"
                 ? "Newest"

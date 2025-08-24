@@ -5,11 +5,15 @@ import {
   TouchableOpacity,
   View,
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
 import { useRouter, Link } from "expo-router";
-import { account } from "../../lib/appwrite";
+import { supabase } from "../../lib/supabase";
+import * as WebBrowser from "expo-web-browser";
+
+WebBrowser.maybeCompleteAuthSession();
 
 export default function SignUpScreen() {
   const router = useRouter();
@@ -19,93 +23,105 @@ export default function SignUpScreen() {
   const [error, setError] = React.useState("");
   const [loading, setLoading] = React.useState(false);
 
+  // 🔹 Email/Password Sign Up
   const onSignUpPress = async () => {
     setError("");
-
-    if (!/^[a-zA-Z0-9-_]+$/.test(username)) {
-      setError("Username can only contain letters, numbers, - or _");
-      return;
-    }
-    if (!email || !password) {
-      setError("Email and password are required");
+    if (!username || !email || !password) {
+      setError("All fields are required");
       return;
     }
 
     setLoading(true);
 
-    try {
-      // Delete any active session first
-      try {
-        await account.deleteSession("current");
-      } catch {
-        // no active session, ignore
-      }
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { username }, // store username in user metadata
+      },
+    });
 
-      // Create new user
-      await account.create("unique()", email, password, username);
-
-      // Create session after signup
-      await account.createEmailPasswordSession(email, password);
-
-      router.replace("/"); // Redirect to home
-    } catch (err: any) {
-      console.error(err);
-      switch (err.code) {
-        case 409:
-          setError("A user with this email already exists. Please login.");
-          break;
-        case 400:
-          setError("Invalid input. Check your email and password.");
-          break;
-        case 401:
-          setError("Unauthorized. Check project ID or endpoint.");
-          break;
-        default:
-          setError(err.message || "Sign-up failed. Try again.");
-      }
-    } finally {
-      setLoading(false);
+    if (error) {
+      setError(error.message);
+    } else {
+      router.replace("/(tabs)/home"); // go to home after sign up
     }
+
+    setLoading(false);
+  };
+
+  // 🔹 Social Sign Up (Google / Facebook)
+  const onSocialSignUp = async (provider: "google" | "facebook") => {
+    setLoading(true);
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: "exp://localhost:8081/--/auth/callback",
+        // 👆 change this for production (EAS build / deployed app)
+      },
+    });
+
+    if (error) {
+      Alert.alert("Sign up failed", error.message);
+    } else {
+      console.log("OAuth redirect started:", data.url);
+    }
+    setLoading(false);
   };
 
   return (
     <KeyboardAvoidingView
-      className="flex-1 bg-white px-10"
+      className="flex-1 bg-gray-50 px-10"
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <View className="flex-1 justify-center items-center">
-        <Text className="text-3xl font-bold mb-6">Create Account</Text>
+        <Text className="text-3xl font-bold mb-6 text-gray-900">
+          Create Account
+        </Text>
 
-        {error ? <Text className="text-red-500 mb-3">{error}</Text> : null}
+        {error ? (
+          <View className="bg-red-100 border border-red-400 rounded-lg p-3 mb-4 w-full">
+            <Text className="text-red-600 text-sm">{error}</Text>
+          </View>
+        ) : null}
 
+        {/* Username */}
         <TextInput
           value={username}
           placeholder="Username"
+          placeholderTextColor="#9CA3AF"
           onChangeText={setUsername}
-          className="w-full border border-gray-300 px-4 py-3 mb-4 rounded-lg"
+          className="w-full border border-gray-300 bg-white px-4 py-3 mb-4 rounded-xl"
         />
 
+        {/* Email */}
         <TextInput
           value={email}
           placeholder="Email"
+          placeholderTextColor="#9CA3AF"
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
-          className="w-full border border-gray-300 px-4 py-3 mb-4 rounded-lg"
+          className="w-full border border-gray-300 bg-white px-4 py-3 mb-4 rounded-xl"
         />
 
+        {/* Password */}
         <TextInput
           value={password}
           placeholder="Password"
+          placeholderTextColor="#9CA3AF"
           onChangeText={setPassword}
           secureTextEntry
-          className="w-full border border-gray-300 px-4 py-3 mb-6 rounded-lg"
+          className="w-full border border-gray-300 bg-white px-4 py-3 mb-6 rounded-xl"
         />
 
+        {/* Sign Up Button */}
         <TouchableOpacity
           onPress={onSignUpPress}
           disabled={loading}
-          className="w-full bg-blue-600 py-3 rounded-xl items-center mb-4"
+          className={`w-full py-3 rounded-2xl items-center mb-4 ${
+            loading ? "bg-gray-400" : "bg-blue-600"
+          }`}
         >
           {loading ? (
             <ActivityIndicator color="#fff" />
@@ -114,10 +130,32 @@ export default function SignUpScreen() {
           )}
         </TouchableOpacity>
 
-        <View className="flex-row items-center">
-          <Text className="mr-1">Already have an account?</Text>
+        {/* Divider */}
+        <Text className="text-gray-500 mb-2">or continue with</Text>
+
+        {/* Google & Facebook */}
+        <View className="flex-row w-full justify-between">
+          <TouchableOpacity
+            onPress={() => onSocialSignUp("google")}
+            className="flex-1 bg-red-500 py-3 rounded-2xl items-center mr-2"
+          >
+            <Text className="text-white font-semibold">Google</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => onSocialSignUp("facebook")}
+            className="flex-1 bg-blue-700 py-3 rounded-2xl items-center ml-2"
+          >
+            <Text className="text-white font-semibold">Facebook</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Sign In Link */}
+        <View className="flex-row items-center mt-6">
+          <Text className="text-gray-700 mr-2">Already have an account?</Text>
           <Link href="./login" replace>
-            <Text className="text-blue-600 font-semibold">Sign In</Text>
+            <TouchableOpacity>
+              <Text className="text-blue-600 font-semibold">Sign In</Text>
+            </TouchableOpacity>
           </Link>
         </View>
       </View>

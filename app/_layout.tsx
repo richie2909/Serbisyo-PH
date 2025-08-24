@@ -3,7 +3,7 @@ import { Stack } from "expo-router";
 import { StatusBar, View, ActivityIndicator } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ThemeProvider } from "../providers/ThemeProvider";
-import { account } from "../lib/appwrite";
+import { supabase } from "../lib/supabase";
 import "../global.css";
 
 export default function RootLayout() {
@@ -12,17 +12,23 @@ export default function RootLayout() {
 
   React.useEffect(() => {
     const checkSession = async () => {
-      try {
-        await account.get(); // Get current user
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
         setIsAuthenticated(true);
-      } catch (err) {
-        setIsAuthenticated(false); // Not logged in
-      } finally {
-        setLoading(false);
+      } else {
+        setIsAuthenticated(false);
       }
+      setLoading(false);
     };
 
     checkSession();
+
+    // Listen for auth state changes (login/logout)
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => listener.subscription.unsubscribe();
   }, []);
 
   if (loading) {
@@ -39,8 +45,9 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ThemeProvider>
         <StatusBar />
-        <Stack screenOptions={{headerShown: false}}/>
-        {/* Optional: You can handle redirects inside each route if needed */}
+        <Stack
+          screenOptions={{ headerShown: false }}
+        />
       </ThemeProvider>
     </SafeAreaProvider>
   );

@@ -1,36 +1,47 @@
-import { View, TextInput } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { View, TextInput, Pressable } from "react-native";
+import { useRouter, usePathname } from "expo-router";
 
 interface SearchBarProps {
   placeholder: string;
-  onSearch: (query: string) => void; // Callback to trigger search
+  initialQuery?: string;
+  onSearch?: (query: string) => void;
 }
 
-export default function SearchBar({ placeholder, onSearch }: SearchBarProps) {
-  const [query, setQuery] = useState("");
+export default function SearchBar({ placeholder, initialQuery = "", onSearch }: SearchBarProps) {
+  const [query, setQuery] = useState(initialQuery);
+  const router = useRouter();
+  const pathname = usePathname();
 
-  // Optional: debounce search to reduce frequent calls
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      onSearch(query.trim());
-    }, 300); // 300ms debounce
+  const handleSearch = () => {
+    const trimmed = query.trim();
+    if (!trimmed) return;
 
-    return () => clearTimeout(timeout);
-  }, [query]);
+    if (pathname === "/tabs/explore") {
+      onSearch?.(trimmed);
+    } else {
+      router.push(`/(tabs)/explore?query=${encodeURIComponent(trimmed)}`);
+    }
+  };
 
   return (
-    <View className="flex-row items-center bg-gray-100 rounded-xl mx-4 mt-4 px-3 py-2">
+    <View className="flex-row items-center bg-white rounded-xl mx-4 my-4 px-3 py-2 shadow">
       <Ionicons name="search" size={20} color="gray" />
       <TextInput
         placeholder={placeholder}
         value={query}
-        onChangeText={setQuery}
-        className="flex-1 ml-2 text-base text-gray-700"
-        returnKeyType="search"
-        onSubmitEditing={() => onSearch(query.trim())} // Trigger search on enter
-        clearButtonMode="while-editing"
+        onChangeText={(text) => {
+          setQuery(text);
+          onSearch?.(text); // ✅ filter as you type
+        }}
+        onSubmitEditing={handleSearch}
+        className="ml-2 flex-1 text-base text-black"
+        placeholderTextColor="gray"
       />
+      <Pressable onPress={handleSearch}>
+        <Ionicons name="arrow-forward" size={20} color="black" />
+      </Pressable>
     </View>
   );
 }

@@ -1,29 +1,35 @@
 import * as React from "react";
 import { View, ActivityIndicator } from "react-native";
 import { Slot, useRouter } from "expo-router";
-import { account } from "../../lib/appwrite";
+import { supabase } from "../../lib/supabase";
 
 export default function RootLayout() {
   const [loading, setLoading] = React.useState(true);
   const [user, setUser] = React.useState<any>(null);
   const router = useRouter();
 
-  // Check if user is logged in
   React.useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const currentUser = await account.get();
-        setUser(currentUser);
-      } catch (err) {
-        setUser(null);
-        // Redirect to login if not authenticated
+    const session = supabase.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        setUser(data.session.user);
+      } else {
         router.replace("/login");
-      } finally {
-        setLoading(false);
       }
-    };
+      setLoading(false);
+    });
 
-    fetchUser();
+    // Optional: listen for auth changes (login/logout)
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
+        router.replace("/login");
+      } else {
+        setUser(session.user);
+      }
+    });
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
   if (loading) {
@@ -34,5 +40,5 @@ export default function RootLayout() {
     );
   }
 
-  return <Slot />; // Render the rest of the app
+  return <Slot />; // Render the authenticated routes
 }
