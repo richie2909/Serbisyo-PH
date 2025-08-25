@@ -2,7 +2,6 @@ import express from "express";
 import { FetchData} from "./fetch.js";
 import Router from "./testToken.js";
 
-import fetch from "node-fetch";
 import dotenv from "dotenv";
 import cors from "cors";
 import searchPosts from "./searchPost.js"; // adjust path
@@ -32,6 +31,9 @@ app.use(Router)
 
 app.use(FetchData)
 // ------------------------
+
+
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

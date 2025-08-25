@@ -1,16 +1,28 @@
-import {View, Text} from "react-native"
+import { View, Text } from "react-native";
 
-
-export interface PersonalInfo {
-    FullName : string
-    PhoneNumber : string
-
+export interface PersonalInfoProps {
+  fullName?: string;
+  phoneNumber?: string;
 }
 
-export default function PersonalInfo({FullName, PhoneNumber}: PersonalInfo) {
-    return <View className="bg-white shadow  mx-[10%] my-8 rounded-2xl w-[80%] px-5 py-3">
-        <Text className="font-semibold text-large text-bg-400 ">Personal Info</Text>
-        <Text className="w-50 h-10 mx-5 my-3 focus:outline-none text-black border-1 border-gray-700 rounded-2xl bg-gray-500">{FullName}</Text>
-        <Text className="w-50 h-10 mx-5 my-3 focus:outline-none text-black border-1 border-gray-300">{PhoneNumber}</Text>
+export default function PersonalInfo({ fullName, phoneNumber }: PersonalInfoProps) {
+  return (
+    <View className="bg-white p-6 rounded-2xl shadow mb-6">
+      <Text className="font-semibold text-lg text-gray-800 mb-3">Personal Info</Text>
+
+      <View className="mb-2">
+        <Text className="text-sm text-gray-500">Full Name</Text>
+        <Text className="text-base text-black">
+          {fullName || "Not set"}
+        </Text>
+      </View>
+
+      <View>
+        <Text className="text-sm text-gray-500">Phone Number</Text>
+        <Text className="text-base text-black">
+          {phoneNumber || "Not set"}
+        </Text>
+      </View>
     </View>
+  );
 }

@@ -1,54 +1,72 @@
+// app/_layout.tsx
+import { Stack, useRouter, useSegments } from "expo-router";
 import * as React from "react";
-import { Stack } from "expo-router";
-import { StatusBar, View, ActivityIndicator } from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import { ThemeProvider } from "../providers/ThemeProvider";
-import { supabase } from "../lib/supabase";
+import { ActivityIndicator, View } from "react-native";
 import "../global.css";
+import { supabase } from "../lib/supabase";
 
 export default function RootLayout() {
   const [loading, setLoading] = React.useState(true);
-  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+  const [user, setUser] = React.useState<any>(null);
+  const router = useRouter();
+  const segments = useSegments();
+
+  // Check if current route is in auth group
+  const isAuthRoute = React.useMemo(() => {
+    return segments.some(segment => segment === "(auth)");
+  }, [segments]);
 
   React.useEffect(() => {
-    const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (data.session) {
-        setIsAuthenticated(true);
-      } else {
-        setIsAuthenticated(false);
+    let mounted = true;
+
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (mounted) {
+          setUser(session?.user ?? null);
+          setLoading(false);
+          
+          // Only redirect if not authenticated and not already on auth pages
+          if (!session && !isAuthRoute) {
+            router.replace("/(auth)/login");
+          }
+        }
+      } catch (error) {
+        console.error("Auth check error:", error);
+        if (mounted) {
+          setLoading(false);
+        }
       }
-      setLoading(false);
     };
 
-    checkSession();
+    checkAuth();
 
-    // Listen for auth state changes (login/logout)
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (mounted) {
+        setUser(session?.user ?? null);
+        
+        // Only redirect if not authenticated and not already on auth pages
+        if (!session && !isAuthRoute) {
+          router.replace("/(auth)/login");
+        }
+      }
     });
 
-    return () => listener.subscription.unsubscribe();
-  }, []);
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [isAuthRoute, router]);
 
   if (loading) {
     return (
-      <SafeAreaProvider>
-        <View className="flex-1 justify-center items-center bg-white">
-          <ActivityIndicator size="large" color="#2563EB" />
-        </View>
-      </SafeAreaProvider>
+      <View className="flex-1 justify-center items-center bg-white">
+        <ActivityIndicator size="large" color="#2563EB" />
+      </View>
     );
   }
 
   return (
-    <SafeAreaProvider>
-      <ThemeProvider>
-        <StatusBar />
-        <Stack
-          screenOptions={{ headerShown: false }}
-        />
-      </ThemeProvider>
-    </SafeAreaProvider>
+    <Stack screenOptions={{ headerShown: false }} />
   );
 }
