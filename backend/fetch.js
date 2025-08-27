@@ -1,7 +1,7 @@
 import express from "express";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
-import supabase from "./lib/supabase.js"; // service role client
+import supabase from "./lib/supabase.js"; // Supabase service role client
 
 dotenv.config();
 
@@ -9,9 +9,6 @@ export const FetchData = express.Router();
 
 const PAGE_ID = process.env.PAGE_ID;
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
-
-// Replace with your LGU id in Supabase (must exist)
-const LGU_ID = process.env.LGU_ID; 
 
 FetchData.get("/api/posts", async (req, res) => {
   try {
@@ -25,7 +22,6 @@ FetchData.get("/api/posts", async (req, res) => {
     const pageResp = await fetch(pageUrl);
     const pageData = await pageResp.json();
     if (pageData.error) throw new Error(pageData.error.message);
-
     console.log("✅ Page info fetched:", pageData.name);
 
     // 2️⃣ Fetch posts
@@ -35,7 +31,6 @@ FetchData.get("/api/posts", async (req, res) => {
     const postsResp = await fetch(postsUrl);
     const postsData = await postsResp.json();
     if (postsData.error) throw new Error(postsData.error.message);
-
     console.log(`✅ ${postsData.data?.length || 0} posts fetched`);
 
     // 3️⃣ Map posts and collect images
@@ -67,10 +62,10 @@ FetchData.get("/api/posts", async (req, res) => {
     for (const post of posts) {
       const { error } = await supabase.from("posts").upsert(
         {
-          lgu_id: LGU_ID, // link to your LGU
           title: post.title,
           content: post.content,
           image_url: post.image_url,
+          post_url: post.post_url,
           created_at: post.created_at,
         },
         { onConflict: ["title", "created_at"] } // prevent duplicates
